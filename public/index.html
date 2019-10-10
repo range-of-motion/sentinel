@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sentinel</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+  </head>
+  <body>
+    <div style="display: flex; width: 100%; max-width: 1200px; margin: 40px auto;">
+      <div style="flex: 1;">
+        <canvas id="cpu" width="400" height="400"></canvas>
+      </div>
+      <div style="flex: 1;">
+        <canvas id="memory" width="400" height="400"></canvas>
+      </div>
+    </div>
+    <script>
+    var chartOptions = {
+      scales: {
+        yAxes: [{
+          display: true,
+
+          ticks: {
+            beginAtZero: true,
+            max: 100,
+            min: 0
+          }
+        }]
+      }
+    };
+
+    var cpuContext = document.getElementById('cpu');
+    var memoryContext = document.getElementById('memory');
+
+    var cpuChart = new Chart(cpuContext, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+            label: 'CPU',
+            data: []
+        }]
+      },
+      options: chartOptions
+    });
+
+    var memoryChart = new Chart(memoryContext, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+            label: 'Memory',
+            data: []
+        }]
+      },
+      options: chartOptions
+    });
+
+    function addData(chart, label, data) {
+      chart.data.labels.push(label);
+
+      chart.data.datasets.forEach((dataset) => {
+        dataset.data.push(data);
+      });
+
+      chart.update();
+    }
+
+    function prependByZero(input) {
+      return ('0' + input).slice(-2);
+    }
+
+    var conn = new WebSocket('ws://localhost:5000');
+
+    conn.onopen = function (e) {
+        console.log("Connection established!");
+    };
+
+    conn.onmessage = function (e) {
+        var json = JSON.parse(e.data);
+
+        var now = new Date();
+        var hour = now.getHours();
+        var minutes = now.getMinutes();
+        var seconds = now.getSeconds();
+        var timestamp = prependByZero(hour) + ':' + prependByZero(minutes) + ':' + prependByZero(seconds);
+
+        addData(cpuChart, timestamp, json.cpu.usagePercentage);
+        addData(memoryChart, timestamp, json.memory.usagePercentage);
+    };
+    </script>
+  </body>
+</html>
