@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "express": "^4.17.1",
     "os-utils": "^0.0.14",
     "ws": "^7.1.2"
   }
