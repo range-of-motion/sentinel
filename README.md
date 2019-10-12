@@ -1,6 +1,6 @@
 # Sentinel
 
-Super easy server monitoring. Named after the [Lockheed Martin RQ-170 Sentinel drone](https://en.wikipedia.org/wiki/Lockheed_Martin_RQ-170_Sentinel).
+Super easy server monitoring. Named after the [Lockheed Martin RQ-170 Sentinel](https://en.wikipedia.org/wiki/Lockheed_Martin_RQ-170_Sentinel) drone.
 
 ![Screenshot](https://i.imgur.com/tCW5DKO.png)
 
@@ -15,10 +15,10 @@ Super easy server monitoring. Named after the [Lockheed Martin RQ-170 Sentinel d
 git clone git@github.com:range-of-motion/sentinel.git
 cd sentinel
 yarn install # Or npm install, but Yarn trumps NPM imo
-node app.js
+yarn start
 ```
 
-And you're done.
+And you're done. Go to `http://localhost:7000` in your browser and voila.
 
 ## To-do
 
