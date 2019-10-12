@@ -5,7 +5,11 @@ Vue.component('chart', {
     chart: null
   }),
 
-  template: '<div style="flex: 1;"><canvas ref="chart" width="400" height="400"></canvas></div>',
+  template: `
+    <div style="flex: 1;">
+      <canvas ref="chart" width="400" height="400"></canvas>
+    </div>
+  `,
 
   watch: {
     data: function () {
@@ -58,7 +62,12 @@ new Vue({
     prependByZero: (input) => ('0' + input).slice(-2)
   },
 
-  template: '<div style="margin: 40px auto; display: flex; width: 100%; max-width: 1200px;"><chart label="CPU" :labels="cpu.labels" :data="cpu.data" /><chart label="Memory" :labels="memory.labels" :data="memory.data" /></div>',
+  template: `
+    <div style="margin: 40px auto; display: flex; width: 100%; max-width: 1200px;">
+      <chart label="CPU" :labels="cpu.labels" :data="cpu.data" />
+      <chart label="Memory" :labels="memory.labels" :data="memory.data" />
+    </div>
+  `,
 
   created: function () {
     var self = this;
