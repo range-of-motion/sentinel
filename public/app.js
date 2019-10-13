@@ -48,10 +48,13 @@ new Vue({
   el: '#app',
 
   data: () => ({
+    connected: false,
+
     cpu: {
       labels: [],
       data: []
     },
+
     memory: {
       labels: [],
       data: []
@@ -63,9 +66,15 @@ new Vue({
   },
 
   template: `
-    <div style="margin: 40px auto; display: flex; width: 100%; max-width: 1200px;">
-      <chart label="CPU" :labels="cpu.labels" :data="cpu.data" />
-      <chart label="Memory" :labels="memory.labels" :data="memory.data" />
+    <div style="margin: 40px auto; width: 100%; max-width: 1200px; font-family: Arial; text-align: center;">
+      <div
+        style="margin-bottom: 20px; display: inline-block; padding: 5px 10px; color: #FFF; font-size: 14px; border-radius: 5px;"
+        :style="connected ? 'background: #1ABC9C;' : 'background: #C0392B;'"
+      >{{ connected ? 'Connected' : 'Disconnected' }}</div>
+      <div style="display: flex;">
+        <chart label="CPU" :labels="cpu.labels" :data="cpu.data" />
+        <chart label="Memory" :labels="memory.labels" :data="memory.data" />
+      </div>
     </div>
   `,
 
@@ -75,7 +84,7 @@ new Vue({
     var conn = new WebSocket('ws://localhost:5000');
 
     conn.onopen = function (e) {
-        console.log("Connection established!");
+        self.connected = true;
     };
 
     conn.onmessage = function (e) {
