@@ -1,5 +1,5 @@
 Vue.component('chart', {
-  props: ['label', 'labels', 'data'],
+  props: ['type', 'label', 'labels', 'data'],
 
   data: () => ({
     chart: null
@@ -20,16 +20,18 @@ Vue.component('chart', {
   mounted: function () {
     var context = this.$refs.chart.getContext('2d');
 
-    this.chart = new Chart(context, {
-      type: 'line',
-      data: {
-        labels: this.labels,
-        datasets: [{
-            label: this.label,
-            data: this.data
+    var options = {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
         }]
-      },
-      options: {
+      }
+    };
+
+    if (this.type === 'line') {
+      options = {
         scales: {
           yAxes: [{
             ticks: {
@@ -39,7 +41,19 @@ Vue.component('chart', {
             }
           }]
         }
-      }
+      };
+    }
+
+    this.chart = new Chart(context, {
+      type: this.type,
+      data: {
+        labels: this.labels,
+        datasets: [{
+            label: this.label,
+            data: this.data
+        }]
+      },
+      options
     });
   }
 });
@@ -55,6 +69,11 @@ new Vue({
     memory: {
       labels: [],
       data: []
+    },
+
+    responses: {
+      labels: [],
+      data: []
     }
   }),
 
@@ -63,9 +82,12 @@ new Vue({
   },
 
   template: `
-    <div style="margin: 40px auto; display: flex; width: 100%; max-width: 1200px;">
-      <chart label="CPU" :labels="cpu.labels" :data="cpu.data" />
-      <chart label="Memory" :labels="memory.labels" :data="memory.data" />
+    <div style="margin: 40px auto; width: 100%; max-width: 1200px;">
+      <div style="display: flex;">
+        <chart type="line" label="CPU" :labels="cpu.labels" :data="cpu.data" />
+        <chart type="line" label="Memory" :labels="memory.labels" :data="memory.data" />
+        <chart type="bar" label="Responses" :labels="responses.labels" :data="responses.data" />
+      </div>
     </div>
   `,
 
@@ -81,19 +103,39 @@ new Vue({
     conn.onmessage = function (e) {
         var json = JSON.parse(e.data);
 
-        var now = new Date();
-        var hour = now.getHours();
-        var minutes = now.getMinutes();
-        var seconds = now.getSeconds();
-        var timestamp = self.prependByZero(hour) + ':' + self.prependByZero(minutes) + ':' + self.prependByZero(seconds);
+        if (json.type === 'RESOURCES_UPDATE') {
+          var now = new Date();
+          var hour = now.getHours();
+          var minutes = now.getMinutes();
+          var seconds = now.getSeconds();
+          var timestamp = self.prependByZero(hour) + ':' + self.prependByZero(minutes) + ':' + self.prependByZero(seconds);
 
-        // CPU
-        self.cpu.labels.push(timestamp);
-        self.cpu.data.push(json.cpu.usagePercentage);
+          // CPU
+          self.cpu.labels.push(timestamp);
+          self.cpu.data.push(json.payload.cpu.usagePercentage);
 
-        // Memory
-        self.memory.labels.push(timestamp);
-        self.memory.data.push(json.memory.usagePercentage);
+          // Memory
+          self.memory.labels.push(timestamp);
+          self.memory.data.push(json.payload.memory.usagePercentage);
+        }
+
+        // Responses
+        if (json.type === 'WEBSERVER_ADD_RESPONSE') {
+          var responseType = json.payload.type;
+          var isNew = false;
+
+          if (!self.responses.labels.includes(responseType)) {
+            self.responses.labels.push(responseType);
+            isNew = true;
+          }
+
+          if (isNew) {
+            self.responses.data.push(1);
+          } else {
+            var position = self.responses.labels.indexOf(responseType);
+            Vue.set(self.responses.data, position, self.responses.data[position] + 1);
+          }
+        }
     };
   }
 });
